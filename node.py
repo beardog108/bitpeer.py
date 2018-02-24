@@ -1,6 +1,6 @@
 import binascii
 import shelve
-import socket
+import socket, socks
 import random
 from pycoin.tx import Tx #remove this
 from io import BytesIO
@@ -26,7 +26,9 @@ class NodeClient (clients.ChainClient):
 
 		if self.failures < MAX_CLIENT_FAILURES:
 			try:
-				self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+				socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 9050)
+				sock = socks.socksocket(socket.AF_INET, socket.SOCK_STREAM)
+				self.socket = sock
 				self.socket.settimeout (3.0)
 				self.socket.connect (self.host)
 				self.socket.settimeout (None)
@@ -137,14 +139,16 @@ class Node:
 				break
 
 			try:
-				sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+				socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 9050)
+				sock = socks.socksocket(socket.AF_INET, socket.SOCK_STREAM)
 				sock.settimeout (3.0)
 				sock.connect (peer)
 				sock.settimeout (None)
 				pcc = NodeClient (sock, self.chain, self, peer)
 				pcc.handshake ()
 				self.clients.append (pcc)
-			except:
+			except Exception as e:
+				print(e)
 				pass
 
 		if len (self.clients) == 0:
