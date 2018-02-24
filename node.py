@@ -26,7 +26,7 @@ class NodeClient (clients.ChainClient):
 
 		if self.failures < MAX_CLIENT_FAILURES:
 			try:
-				socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 9050)
+				socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", self.torPort)
 				sock = socks.socksocket(socket.AF_INET, socket.SOCK_STREAM)
 				self.socket = sock
 				self.socket.settimeout (3.0)
@@ -60,7 +60,7 @@ class NodeClient (clients.ChainClient):
 
 
 class Node:
-	def __init__ (self, chain, storagedb, lastblockhash = None, lastblockheight = None, logger=None, maxpeers=15):
+	def __init__ (self, chain, storagedb, lastblockhash = None, lastblockheight = None, logger=None, maxpeers=15, torPort=9050):
 		if not networks.isSupported (chain):
 			raise networks.UnsupportedChainException ()
 
@@ -86,6 +86,7 @@ class Node:
 		self.boottimer = None
 		self.postblocks = {}
 		self.newblocklock = Lock ()
+		self.torPort = torPort
 
 		# Create mempool
 		#if not 'mempool' in self.db:
@@ -139,7 +140,7 @@ class Node:
 				break
 
 			try:
-				socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", 9050)
+				socks.set_default_proxy(socks.SOCKS5, "127.0.0.1", self.torPort)
 				sock = socks.socksocket(socket.AF_INET, socket.SOCK_STREAM)
 				sock.settimeout (3.0)
 				sock.connect (peer)
