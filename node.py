@@ -1,7 +1,7 @@
 import binascii
 import shelve
 import socket, socks
-import random
+import random, sys
 from pycoin.tx import Tx #remove this
 from io import BytesIO
 from threading import Thread, Lock, Timer
@@ -149,7 +149,7 @@ class Node:
 				pcc.handshake ()
 				self.clients.append (pcc)
 			except Exception as e:
-				print(e)
+				#print(e)
 				pass
 
 		if len (self.clients) == 0:
@@ -169,7 +169,10 @@ class Node:
 	def sync (self):
 		if len (self.clients) == 0:
 			self.logger.debug ('No clients available, bootstrapping...')
-			self.reboot ()
+			try:
+				self.reboot ()
+			except AttributeError:
+				sys.exit(0)
 			return
 
 		if len (self.clients) < self.minpeers:
